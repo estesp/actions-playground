@@ -34,7 +34,10 @@ jobs:
     - name: r00t Build
       working-directory: src/github.com/estesp/actions-playground
       run: |
+        echo "ACTIONS ENV:"
+        env
         sudo make binary
+        sudo ./install-runc
 
     - name: Build
       working-directory: src/github.com/estesp/actions-playground
