@@ -37,7 +37,7 @@ jobs:
         echo "ACTIONS ENV:"
         go env
         sudo make binary
-        sudo PATH=$PATH GOPATH=$GOPATH GOROOT=$GOROOT ./install-runc
+        sudo PATH=$PATH GOPATH=$GOPATH _root=$GOROOT GOROOT=$GOROOT ./install-runc
 
     - name: Build
       working-directory: src/github.com/estesp/actions-playground

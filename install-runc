@@ -36,6 +36,8 @@ function install_crun() {
 }
 
 : ${RUNC_FLAVOR=runc}
+echo "R00T = $_root"
+GO_ROOT=$_root
 echo "GO ENVIRONMENT:"
 go env
 
