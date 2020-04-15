@@ -34,9 +34,14 @@ jobs:
     - name: r00t Build
       working-directory: src/github.com/estesp/actions-playground
       run: |
-        echo "ACTIONS ENV:"
+        echo "***************"
+        echo "ACTIONS GO ENV:"
+        echo ""
         go env
-        sudo make binary
+        echo ""
+        echo "**** PATH: "
+        echo $PATH
+        echo ""
         sudo PATH=$PATH GOPATH=$GOPATH _root=$GOROOT GOROOT=$GOROOT ./install-runc
 
     - name: Build

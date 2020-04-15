@@ -36,8 +36,12 @@ function install_crun() {
 }
 
 : ${RUNC_FLAVOR=runc}
-echo "R00T = $_root"
-GO_ROOT=$_root
+echo ">>> GOROOT = $GOROOT"
+echo ">>> R00T = $_root"
+export GOROOT=$_root
+echo ">>> GOPATH = $GOPATH"
+echo ">>> PATH = $PATH"
+echo "***************"
 echo "GO ENVIRONMENT:"
 go env
 
