@@ -4,4 +4,4 @@ all: binary
 
 binary: ## build the go packages
 	@go get github.com/dghubble/sling
-	@go build -o mquery .
+	@go build -buildmode=pie -tags "sometag" -o mquery .
