@@ -31,12 +31,12 @@ jobs:
         path: src/github.com/estesp/actions-playground
         fetch-depth: 25
 
-    - name: Build
-      working-directory: src/github.com/estesp/actions-playground
-      run: |
-        make binary
-
     - name: r00t Build
       working-directory: src/github.com/estesp/actions-playground
       run: |
         sudo make binary
+
+    - name: Build
+      working-directory: src/github.com/estesp/actions-playground
+      run: |
+        make binary
