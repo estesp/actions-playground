@@ -24,6 +24,7 @@ jobs:
       run: |
         echo "::set-env name=GOPATH::${{ github.workspace }}"
         echo "::add-path::${{ github.workspace }}/bin"
+        uname -a
 
     - name: Check out code
       uses: actions/checkout@v2
