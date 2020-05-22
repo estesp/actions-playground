@@ -105,6 +105,8 @@ jobs:
           path: builds
       - name: Catalog build assets for upload
         id: catalog
+        env:
+          RELEASEVER: ${{ github.ref }}
         run: |
           _filenum=1
           for i in "ubuntu-18.04" "windows-2019"; do
@@ -113,6 +115,7 @@ jobs:
               let "_filenum+=1"
             done
           done
+          echo "::set-output name=stringver::${RELEASEVER#ref/tags/v}"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -120,7 +123,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: containerd ${{ github.ref }}
+          release_name: containerd ${{ steps.catalog.outputs.stringver }}
           draft: false
           prerelease: false
       - name: Upload Linux containerd tarball
