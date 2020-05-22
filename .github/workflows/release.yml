@@ -2,14 +2,17 @@ on:
   push:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-  
+
 name: Containerd Release
-  
+
 jobs:
   check:
     name: Check Signed Tag
     runs-on: ubuntu-18.04
     timeout-minutes: 5
+    outputs:
+      stringver: ${{ steps.contentrel.outputs.stringver }}
+      releasebody: ${{ steps.contentrel.outputs.releasebody }}
 
     steps:
       - name: Checkout code
@@ -33,12 +36,25 @@ jobs:
           }
         working-directory: src/github.com/containerd/containerd
 
+      - name: Release content
+        id: contentrel
+        run: |
+          RELEASEVER=${{ github.ref }}
+          echo "::set-output name=stringver::${RELEASEVER#refs/tags/v}"
+          BODY=$(git tag -l ${RELEASEVER#refs/tags/} -n1000 | tail -n +3 | cut -c 5-)
+          # preserve multiline output for GH Actions "output" support
+          BODY="${BODY//'%'/'%25'}"
+          BODY="${BODY//$'\n'/'%0A'}"
+          BODY="${BODY//$'\r'/'%0D'}"
+          echo "::set-output name=releasebody::$BODY"
+        working-directory: src/github.com/containerd/containerd
+
   build:
     name: Build Release Binaries
     runs-on: ${{ matrix.os }}
     needs: [check]
     timeout-minutes: 10
-  
+
     strategy:
       matrix:
         os: [ubuntu-18.04, windows-2019]
@@ -69,7 +85,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get install -y btrfs-tools libseccomp-dev
-    
+
       - name: Make
         shell: bash
         env:
@@ -96,7 +112,7 @@ jobs:
     name: Create containerd Release
     runs-on: ubuntu-18.04
     timeout-minutes: 10
-    needs: [build]
+    needs: [build, check]
 
     steps:
       - name: Download builds
@@ -115,7 +131,6 @@ jobs:
               let "_filenum+=1"
             done
           done
-          echo "::set-output name=stringver::${RELEASEVER#refs/tags/v}"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -123,9 +138,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: containerd ${{ steps.catalog.outputs.stringver }}
+          release_name: containerd ${{ needs.check.outputs.stringver }}
+          body: ${{ needs.check.outputs.releasebody }}
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
       - name: Upload Linux containerd tarball
         uses: actions/upload-release-asset@v1
         env:
