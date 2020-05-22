@@ -115,7 +115,7 @@ jobs:
               let "_filenum+=1"
             done
           done
-          echo "::set-output name=stringver::${RELEASEVER#ref/tags/v}"
+          echo "::set-output name=stringver::${RELEASEVER#refs/tags/v}"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
