@@ -93,7 +93,7 @@ jobs:
           path: src/github.com/containerd/containerd/*.tar.gz*
 
   release:
-    name: Create Release
+    name: Create containerd Release
     runs-on: ubuntu-18.04
     timeout-minutes: 10
     needs: [build]
@@ -120,7 +120,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          release_name: containerd ${{ github.ref }}
           draft: false
           prerelease: false
       - name: Upload Linux containerd tarball
