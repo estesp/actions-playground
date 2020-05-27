@@ -12,7 +12,6 @@ jobs:
     timeout-minutes: 5
     outputs:
       stringver: ${{ steps.contentrel.outputs.stringver }}
-      releasebody: ${{ steps.contentrel.outputs.releasebody }}
 
     steps:
       - name: Checkout code
@@ -41,13 +40,14 @@ jobs:
         run: |
           RELEASEVER=${{ github.ref }}
           echo "::set-output name=stringver::${RELEASEVER#refs/tags/v}"
-          BODY=$(git tag -l ${RELEASEVER#refs/tags/} -n1000 | tail -n +3 | cut -c 5-)
-          # preserve multiline output for GH Actions "output" support
-          BODY="${BODY//'%'/'%25'}"
-          BODY="${BODY//$'\n'/'%0A'}"
-          BODY="${BODY//$'\r'/'%0D'}"
-          echo "::set-output name=releasebody::$BODY"
+          git tag -l ${RELEASEVER#refs/tags/} -n1000 | tail -n +3 | cut -c 5- >release-notes.md
         working-directory: src/github.com/containerd/containerd
+
+      - name: Save release notes
+        uses: actions/upload-artifact@v2
+        with:
+          name: containerd-release-notes
+          path: src/github.com/containerd/containerd/release-notes.md
 
   build:
     name: Build Release Binaries
@@ -115,7 +115,7 @@ jobs:
     needs: [build, check]
 
     steps:
-      - name: Download builds
+      - name: Download builds and release notes
         uses: actions/download-artifact@v2
         with:
           path: builds
@@ -133,13 +133,13 @@ jobs:
           done
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: jbolda/create-release@v1.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: containerd ${{ needs.check.outputs.stringver }}
-          body: ${{ needs.check.outputs.releasebody }}
+          bodyFromFile: ./builds/containerd-release-notes/release-notes.md
           draft: false
           prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
       - name: Upload Linux containerd tarball
